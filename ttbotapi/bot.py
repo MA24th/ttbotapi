@@ -113,7 +113,9 @@ class Bot:
         :rtype: objects.Message
         """
         resp = methods.get_pinned_message(self.__access_token, chat_id, self.__proxies)
-        return objects.Message.de_json(resp)
+        if resp:
+            return objects.Message.de_json(resp['message'])
+        return resp
 
     def pin_message(self, chat_id, message_id, notify=True):
         """
@@ -160,7 +162,7 @@ class Bot:
     def get_chat_admins(self, chat_id):
         """
         Get all chat administrator, Bot must be administrator in requested chat
-        :param int chat_id:
+        :param int chat_id: chat identifier
         :return: Array of Users, On success
         :rtype: list[objects.User]
         """
@@ -170,7 +172,7 @@ class Bot:
             users.append(objects.User.de_json(x))
         return users
 
-    def get_chat_members(self, chat_id, user_ids, marker, count=20):
+    def get_chat_members(self, chat_id, user_ids=None, marker=None, count=20):
         """
         Get users participated in chat
         :param int chat_id: chat identifier
@@ -189,8 +191,8 @@ class Bot:
     def add_members(self, chat_id, user_ids):
         """
         Adds members to chat
-        :param chat_id: chat identifier
-        :param user_ids: users identifier
+        :param int chat_id: chat identifier
+        :param list[int] user_ids: users identifier
         :return: True, On success
         :rtype: dict
         """
@@ -209,7 +211,7 @@ class Bot:
         resp = methods.remove_member(self.__access_token, chat_id, user_ids, block, self.__proxies)
         return resp
 
-    def get_messages(self, chat_id, message_ids, ffrom, to, count=50):
+    def get_messages(self, chat_id=None, message_ids=None, ffrom=None, to=None, count=50):
         """
         Get messages in chat
         :param int or None chat_id: Chat identifier
