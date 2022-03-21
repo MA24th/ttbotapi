@@ -29,7 +29,9 @@ class User(JsonDeserializable):
         obj = cls.check_type(obj_type)
         user_id = obj['user_id']
         name = obj['name']
-        username = obj['username']
+        username = None
+        if 'username' in obj:
+            username = obj['username']
         is_bot = obj['is_bot']
         last_activity_time = obj['last_activity_time']
         description = None
@@ -81,19 +83,41 @@ class Chat(JsonDeserializable):
         chat_id = obj['chat_id']
         ttype = obj['type']
         status = obj['status']
-        title = obj['title']
-        icon = obj['icon']
+        title = None
+        if 'title' in obj:
+            title = obj['title']
+        icon = None
+        if 'icon' in obj:
+            icon = obj['icon']
         last_event_time = obj['last_event_time']
         participants_count = obj['participants_count']
-        owner_id = obj['owner_id']
-        participants = obj['participants']
-        is_public = obj['is_public']
-        link = obj['link']
-        description = obj['description']
-        dialog_with_user = User.de_json(obj['dialog_with_user'])
-        messages_count = obj['messages_count']
-        chat_message_id = obj['chat_message_id']
-        pinned_message = Message.de_json(obj['pinned_message'])
+        owner_id = None
+        if 'owner_id' in obj:
+            owner_id = obj['owner_id']
+        participants = None
+        if 'participants' in obj:
+            participants = obj['participants']
+        is_public = None
+        if 'is_public' in obj:
+            is_public = obj['is_public']
+        link = None
+        if 'link' in obj:
+            link = obj['link']
+        description = None
+        if 'description' in obj:
+            description = obj['description']
+        dialog_with_user = None
+        if 'dialog_with_user' in obj:
+            dialog_with_user = User.de_json(obj['dialog_with_user'])
+        messages_count = None
+        if 'messages_count' in obj:
+            messages_count = obj['messages_count']
+        chat_message_id = None
+        if 'chat_message_id' in obj:
+            chat_message_id = obj['chat_message_id']
+        pinned_message = None
+        if 'pinned_message' in obj:
+            pinned_message = Message.de_json(obj['pinned_message'])
         return cls(chat_id, ttype, status, title, icon, last_event_time, participants_count, owner_id, participants,
                    is_public, link, description, dialog_with_user, messages_count, chat_message_id, pinned_message)
 
@@ -112,34 +136,66 @@ class Message(JsonDeserializable):
     @classmethod
     def de_json(cls, obj_type):
         obj = cls.check_type(obj_type)
-        sender = User.de_json(obj['sender'])
+        sender = None
+        if 'sender' in obj:
+            sender = User.de_json(obj['sender'])
         recipient = obj['recipient']
         timestamp = obj['timestamp']
-        link = obj['link']
+        link = None
+        if 'link' in obj:
+            link = obj['link']
         body = obj['body']
-        stat = obj['stat']
+        stat = None
+        if 'stat' in obj:
+            stat = obj['stat']
         url = obj['url']
-        constructor = obj['constructor']
+        constructor = None
+        if 'constructor' in obj:
+            constructor = obj['constructor']
         return cls(sender, recipient, timestamp, link, body, stat, url, constructor)
 
 
 class NewMessage(JsonDeserializable):
-    def __init__(self, text, attachments, link, notify, formatted):
+    def __init__(self, text, attachments, link, notify, formatter):
         self.text = text
         self.attachments = attachments
         self.link = link
         self.notify = notify
-        self.formatted = formatted
+        self.formatter = formatter
 
     @classmethod
     def de_json(cls, obj_type):
         obj = cls.check_type(obj_type)
         text = obj['text']
-        attachment = obj['attachment']
+        attachment = NewMessage.parse_attachment(obj['attachment'])
         link = obj['link']
-        notify = obj['notify']
-        formatted = obj['format']
-        return cls(text, attachment, link, notify, formatted)
+        notify = None
+        if 'notify' in obj:
+            notify = obj['notify']
+        formatter = None
+        if 'format' in obj:
+            formatter = obj['format']
+        return cls(text, attachment, link, notify, formatter)
+
+    @staticmethod
+    def parse_attachment(obj):
+        attachments = []
+        for x in obj:
+            attachments.append(AttachmentRequest.de_json(x))
+        return attachments
+
+
+class AttachmentRequest(JsonDeserializable):
+    def __init__(self, ttype, payload):
+        self.ttype = ttype
+        self.payload = payload
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        ttype = obj['type']
+        payload = obj['payload']
+        return cls(ttype, payload)
 
 
 class Update(JsonDeserializable):
