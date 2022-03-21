@@ -7,3 +7,5 @@ ttbotapi
 :license: GPLv2, see LICENSE for more details.
 """
 from .utils import logger
+from .objects import BotCommand, NewMessage
+from .bot import Bot

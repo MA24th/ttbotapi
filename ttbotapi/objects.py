@@ -8,7 +8,6 @@ All objects used in the Bot API responses are represented as JSON-objects.
 :copyright: (c) 2022 by Mustafa Asaad.
 :license: GPLv2, see LICENSE for more details.
 """
-from unicodedata import name
 from .utils import JsonDeserializable, JsonSerializable
 
 
@@ -237,4 +236,3 @@ class BotCommand(JsonDeserializable, JsonSerializable):
     def to_dict(self):
         obj = {"name": self.name, "description": self.description}
         return obj
-
