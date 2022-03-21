@@ -194,7 +194,9 @@ class Attachment(JsonDeserializable):
     def de_json(cls, obj_type):
         obj = cls.check_type(obj_type)
         ttype = obj['type']
-        payload = obj['payload']
+        payload = None
+        if 'payload' in obj:
+            payload = obj['payload']
         return cls(ttype, payload)
 
 
