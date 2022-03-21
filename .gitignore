@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # IDE folders & files
-.idea
-.vscode
+.idea*
+.vscode*
