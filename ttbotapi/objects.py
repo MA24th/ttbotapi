@@ -144,7 +144,7 @@ class Message(JsonDeserializable):
         link = None
         if 'link' in obj:
             link = obj['link']
-        body = obj['body']
+        body = Body.de_json(obj['body'])
         stat = None
         if 'stat' in obj:
             stat = obj['stat']
@@ -181,11 +181,11 @@ class NewMessage(JsonDeserializable):
     def parse_attachment(obj):
         attachments = []
         for x in obj:
-            attachments.append(AttachmentRequest.de_json(x))
+            attachments.append(Attachment.de_json(x))
         return attachments
 
 
-class AttachmentRequest(JsonDeserializable):
+class Attachment(JsonDeserializable):
     def __init__(self, ttype, payload):
         self.ttype = ttype
         self.payload = payload
@@ -196,6 +196,43 @@ class AttachmentRequest(JsonDeserializable):
         ttype = obj['type']
         payload = obj['payload']
         return cls(ttype, payload)
+
+
+class Body(JsonDeserializable):
+    def __init__(self, mid, seq, text, attachments, markup):
+        self.mid = mid
+        self.seq = seq
+        self.text = text
+        self.attachments = attachments
+        self.markup = markup
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        mid = obj['mid']
+        seq = obj['seq']
+        text = obj['text']
+        attachments = None
+        if 'attachments' in obj:
+            attachments = Body.parse_attachments(obj['attachments'])
+        markup = None
+        if 'markup' in obj:
+            markup = Body.parse_markup(obj['markup'])
+        return cls(mid, seq, text, attachments, markup)
+
+    @staticmethod
+    def parse_attachments(obj):
+        attachments = []
+        for x in obj:
+            attachments.append(Attachment.de_json(x))
+        return attachments
+
+    @staticmethod
+    def parse_markup(obj):
+        markups = []
+        for x in obj:
+            markups.append(MarkupElement.de_json(x))
+        return markups
 
 
 class MarkupElement(JsonDeserializable):
