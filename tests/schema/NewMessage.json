@@ -1,0 +1,14 @@
+{
+  "text": "string",
+  "attachments": [
+    {
+      "type": "string"
+    }
+  ],
+  "link": {
+    "type": "forward",
+    "mid": "string"
+  },
+  "notify": true,
+  "format": "markdown"
+}

@@ -1,0 +1,10 @@
+{
+  "user_id": 0,
+  "name": "string",
+  "username": "string",
+  "is_bot": true,
+  "last_activity_time": 0,
+  "description": "string",
+  "avatar_url": "string",
+  "full_avatar_url": "string"
+}

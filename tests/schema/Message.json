@@ -1,0 +1,71 @@
+{
+  "sender": {
+    "user_id": 0,
+    "name": "string",
+    "username": "string",
+    "is_bot": true,
+    "last_activity_time": 0
+  },
+  "recipient": {
+    "chat_id": 0,
+    "chat_type": "dialog",
+    "user_id": 0
+  },
+  "timestamp": 0,
+  "link": {
+    "type": "forward",
+    "sender": {
+      "user_id": 0,
+      "name": "string",
+      "username": "string",
+      "is_bot": true,
+      "last_activity_time": 0
+    },
+    "chat_id": 0,
+    "message": {
+      "mid": "string",
+      "seq": 0,
+      "text": "string",
+      "attachments": [
+        {
+          "type": "string"
+        }
+      ],
+      "markup": [
+        {
+          "type": "string",
+          "from": 0,
+          "length": 0
+        }
+      ]
+    }
+  },
+  "body": {
+    "mid": "string",
+    "seq": 0,
+    "text": "string",
+    "attachments": [
+      {
+        "type": "string"
+      }
+    ],
+    "markup": [
+      {
+        "type": "string",
+        "from": 0,
+        "length": 0
+      }
+    ]
+  },
+  "stat": {
+    "views": 0
+  },
+  "url": "string",
+  "constructor": {
+    "user_id": 0,
+    "name": "string",
+    "username": "string",
+    "is_bot": true,
+    "last_activity_time": 0
+  }
+}

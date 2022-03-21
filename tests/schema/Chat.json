@@ -1,0 +1,102 @@
+{
+  "chat_id": 0,
+  "type": "dialog",
+  "status": "active",
+  "title": "string",
+  "icon": {
+    "url": "string"
+  },
+  "last_event_time": 0,
+  "participants_count": 0,
+  "owner_id": 0,
+  "participants": {
+    "property1": 0,
+    "property2": 0
+  },
+  "is_public": true,
+  "link": "string",
+  "description": "string",
+  "dialog_with_user": {
+    "user_id": 0,
+    "name": "string",
+    "username": "string",
+    "is_bot": true,
+    "last_activity_time": 0,
+    "description": "string",
+    "avatar_url": "string",
+    "full_avatar_url": "string"
+  },
+  "messages_count": 0,
+  "chat_message_id": "string",
+  "pinned_message": {
+    "sender": {
+      "user_id": 0,
+      "name": "string",
+      "username": "string",
+      "is_bot": true,
+      "last_activity_time": 0
+    },
+    "recipient": {
+      "chat_id": 0,
+      "chat_type": "dialog",
+      "user_id": 0
+    },
+    "timestamp": 0,
+    "link": {
+      "type": "forward",
+      "sender": {
+        "user_id": 0,
+        "name": "string",
+        "username": "string",
+        "is_bot": true,
+        "last_activity_time": 0
+      },
+      "chat_id": 0,
+      "message": {
+        "mid": "string",
+        "seq": 0,
+        "text": "string",
+        "attachments": [
+          {
+            "type": "string"
+          }
+        ],
+        "markup": [
+          {
+            "type": "string",
+            "from": 0,
+            "length": 0
+          }
+        ]
+      }
+    },
+    "body": {
+      "mid": "string",
+      "seq": 0,
+      "text": "string",
+      "attachments": [
+        {
+          "type": "string"
+        }
+      ],
+      "markup": [
+        {
+          "type": "string",
+          "from": 0,
+          "length": 0
+        }
+      ]
+    },
+    "stat": {
+      "views": 0
+    },
+    "url": "string",
+    "constructor": {
+      "user_id": 0,
+      "name": "string",
+      "username": "string",
+      "is_bot": true,
+      "last_activity_time": 0
+    }
+  }
+}
