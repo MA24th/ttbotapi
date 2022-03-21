@@ -198,6 +198,33 @@ class AttachmentRequest(JsonDeserializable):
         return cls(ttype, payload)
 
 
+class MarkupElement(JsonDeserializable):
+    def __init__(self, ttype, ffrom, length, url, user_link, user_id):
+        self.ttype = ttype
+        self.ffrom = ffrom
+        self.length = length
+        self.url = url
+        self.user_link = user_link
+        self.user_id = user_id
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        ttype = obj['type']
+        ffrom = obj['from']
+        length = obj['length']
+        url = None
+        if 'url' in obj:
+            url = obj['url']
+        user_link = None
+        if 'user_link' in obj:
+            user_link = obj['user_link']
+        user_id = None
+        if 'user_id' in obj:
+            user_id = obj['user_id']
+        return cls(ttype, ffrom, length, url, user_link, user_id)
+
+
 class Update(JsonDeserializable):
     def __init__(self, update_type, timestamp, callback, message, user_locale, message_id, chat_id, user_id, session_id,
                  inviter_id, admin_id, user, is_channel, payload, title, data, iinput, start_payload):
