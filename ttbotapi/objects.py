@@ -45,7 +45,7 @@ class MemberInfo(JsonDeserializable):
 
 class User(JsonDeserializable):
     def __init__(self, user_id, name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url,
-                 commands):
+                 commands, last_access_time, is_owner, is_admin, join_time, permissions):
         self.user_id = user_id
         self.name = name
         self.username = username
@@ -55,6 +55,11 @@ class User(JsonDeserializable):
         self.avatar_url = avatar_url
         self.full_avatar_url = full_avatar_url
         self.commands = commands
+        self.last_access_time = last_access_time
+        self.is_owner = is_owner
+        self.is_admin = is_admin
+        self.join_time = join_time
+        self.permissions = permissions
 
     @classmethod
     def de_json(cls, obj_type):
@@ -78,8 +83,23 @@ class User(JsonDeserializable):
         commands = None
         if 'commands' in obj:
             commands = User.parse_commands(obj['commands'])
+        last_access_time = None
+        if 'last_access_time' in obj:
+            last_access_time = obj['last_access_time']
+        is_owner = False
+        if 'is_owner' in obj:
+            is_owner = obj['is_owner']
+        is_admin = False
+        if 'is_admin' in obj:
+            is_admin = obj['is_admin']
+        join_time = False
+        if 'join_time' in obj:
+            join_time = obj['join_time']
+        permissions = False
+        if 'permissions' in obj:
+            permissions = obj['permissions']
         return cls(user_id, name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url,
-                   commands)
+                   commands, last_access_time, is_owner, is_admin, join_time, permissions)
 
     @staticmethod
     def parse_commands(obj):
