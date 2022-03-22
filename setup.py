@@ -5,6 +5,7 @@ def read(filename):
     with open(filename, encoding='utf-8') as file:
         return file.read()
 
+
 setup(
     name='ttbotapi',
     version='0.3.0',
@@ -20,5 +21,6 @@ setup(
                  'Programming Language :: Python :: 3.8',
                  'Programming Language :: Python :: 3.9',
                  'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'],
-    license='GNU GPLv2'
+    license='GNU GPLv2',
+    install_requires=['requests']
 )
