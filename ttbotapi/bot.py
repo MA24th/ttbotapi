@@ -50,14 +50,11 @@ class Bot:
         Get information about chats that bot participated in
         :param int or None count: Number of chats requested
         :param int or None marker: Points to Next data page
-        :return: On Success, Array of Chat Object
-        :rtype: list[objects.Chat]
+        :return: On Success, ChatInfo Object
+        :rtype: objects.ChatInfo
         """
         resp = methods.get_all_chats(self.__access_token, count, marker, self.__proxies)
-        chats = []
-        for x in resp['chats']:
-            chats.append(objects.Chat.de_json(x))
-        return chats
+        return objects.ChatInfo.de_json(resp)
 
     def get_chat_by_link(self, chat_link):
         """
@@ -99,11 +96,11 @@ class Bot:
         :param int chat_id: chat identifier
         :param str action: Enum: "typing_on" "sending_photo" "sending_video" "sending_audio" "sending_file" "mark_seen"
                              Different actions to send to chat members
-        :return: On success, True
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.send_action(self.__access_token, chat_id, action, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_pinned_message(self, chat_id):
         """
@@ -123,21 +120,21 @@ class Bot:
         :param int chat_id: chat identifier
         :param str message_id: Identifier of message to be pinned in chat
         :param bool notify: By default, participants will be notified about change with system message in chat/channel
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.pin_message(self.__access_token, chat_id, message_id, notify, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def unpin_message(self, chat_id):
         """
         Unpins message in chat or channel
         :param int chat_id: chat identifier
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.unpin_message(self.__access_token, chat_id, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_chat_membership(self, chat_id):
         """
@@ -153,24 +150,21 @@ class Bot:
         """
         Removes bot from chat members
         :param int chat_id: chat identifier
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.leave_chat(self.__access_token, chat_id, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_chat_admins(self, chat_id):
         """
         Get all chat administrator, Bot must be administrator in requested chat
         :param int chat_id: chat identifier
-        :return: Array of Users, On success
-        :rtype: list[objects.User]
+        :return: On success, MemberInfo
+        :rtype: objects.MemberInfo
         """
         resp = methods.get_chat_admins(self.__access_token, chat_id, self.__proxies)
-        users = []
-        for x in resp['members']:
-            users.append(objects.User.de_json(x))
-        return users
+        return objects.MemberInfo.de_json(resp)
 
     def get_chat_members(self, chat_id, user_ids=None, marker=None, count=20):
         """
@@ -179,25 +173,22 @@ class Bot:
         :param list[int] or None user_ids: users identifier
         :param int or None marker: a Marker
         :param int count: Default 20, Count
-        :return: Array of Users, On success
-        :rtype: list[objects.User]
+        :return: On success, MemberInfo
+        :rtype: objects.MemberInfo
         """
         resp = methods.get_members(self.__access_token, chat_id, user_ids, marker, count, self.__proxies)
-        users = []
-        for x in resp['members']:
-            users.append(objects.User.de_json(x))
-        return users
+        return objects.MemberInfo.de_json(resp)
 
     def add_members(self, chat_id, user_ids):
         """
         Adds members to chat
         :param int chat_id: chat identifier
         :param list[int] user_ids: users identifier
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.add_members(self.__access_token, chat_id, user_ids, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def remove_member(self, chat_id, user_ids, block=False):
         """
@@ -205,11 +196,11 @@ class Bot:
         :param chat_id: chat identifier
         :param user_ids: users identifier
         :param block: Set to True if user should be blocked in chat
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.remove_member(self.__access_token, chat_id, user_ids, block, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_messages(self, chat_id=None, message_ids=None, ffrom=None, to=None, count=50):
         """
@@ -256,22 +247,22 @@ class Bot:
         :param str or None link: Link to message
         :param bool notify: If false, chat participants would not be notified
         :param str or None formatter: Enum: "markdown" "html" If set, message text will be formatted
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.edit_message(self.__access_token, message_id, text, attachments, link, notify, formatter,
                                     self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def delete_message(self, message_id):
         """
         Delete existing message
         :param str message_id: Message identifier
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.delete_message(self.__access_token, message_id, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_message(self, message_id):
         """
@@ -289,11 +280,11 @@ class Bot:
         :param str callback_id: Identifies a button clicked by user
         :param message: Fill this if you want to modify current message
         :param notification: Fill this if you want to send one time notification to user
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.answer_on_callback(self.__access_token, callback_id, message, notification, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def construct_message(self, session_id, messages=None, allow_user_input=False, hint=None, data=None, keyboard=None,
                           placeholder=None):
@@ -308,21 +299,24 @@ class Bot:
                                  It is handy to store here any state of construction session
         :param object or None keyboard: Keyboard to show to user in constructor mode
         :param str or None placeholder: Text to show over the text field
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.construct_message(self.__access_token, session_id, messages, allow_user_input, hint, data,
                                          keyboard, placeholder, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_subscriptions(self):
         """
         In case your bot gets data via WebHook, the method returns list of all subscriptions
         :return: On Success, Array of Subscriptions object
-        :rtype: list[object]
+        :rtype: list[objects.Subscription]
         """
         resp = methods.get_subscriptions(self.__access_token, self.__proxies)
-        return resp
+        subscriptions = []
+        for x in resp:
+            subscriptions.append(objects.Subscription.de_json(x))
+        return subscriptions
 
     def subscribe(self, url, update_types=None, version=None):
         """
@@ -330,21 +324,21 @@ class Bot:
         :param str url: URL of HTTP(S)-endpoint of your bot. Must starts with http(s)://
         :param list[str] or None update_types: List of update types your bot want to receive
         :param str or None version: Version of API, Affects model representation
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.subscribe(self.__proxies, url, update_types, version, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def unsubscribe(self, url):
         """
         Unsubscribes bot from receiving updates via WebHook
         :param str url:
-        :return: True, On success
-        :rtype: dict
+        :return: On success, Response Object
+        :rtype: objects.Response
         """
         resp = methods.unsubscribe(self.__access_token, url, self.__proxies)
-        return resp
+        return objects.Response.de_json(resp)
 
     def get_updates(self, limit=100, timeout=30, marker=None, types=None):
         """
