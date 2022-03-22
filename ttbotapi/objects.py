@@ -11,6 +11,19 @@ All objects used in the Bot API responses are represented as JSON-objects.
 from .utils import JsonDeserializable, JsonSerializable
 
 
+class Response(JsonDeserializable):
+    def __init__(self, success, message):
+        self.success = success
+        self.message = message
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        success = obj['success']
+        message = obj['message']
+        return cls(success, message)
+
+
 class User(JsonDeserializable):
     def __init__(self, user_id, name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url,
                  commands):
