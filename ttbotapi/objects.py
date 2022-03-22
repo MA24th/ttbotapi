@@ -142,6 +142,21 @@ class Permissions(JsonDeserializable):
         return cls(read_all_messages, add_remove_members, add_admins, change_chat_info, pin_message, write)
 
 
+class Recipient(JsonDeserializable):
+    def __init__(self, chat_id, chat_type, user_id):
+        self.chat_id = chat_id
+        self.chat_type = chat_type
+        self.user_id = user_id
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        chat_id = obj['chat_id']
+        chat_type = obj['chat_type']
+        user_id = obj['user_id']
+        return cls(chat_id, chat_type, user_id)
+
+
 class Chat(JsonDeserializable):
     def __init__(self, chat_id, ttype, status, title, icon, last_event_time, participants_count, owner_id, participants,
                  is_public, link, description, dialog_with_user, messages_count, chat_message_id, pinned_message):
@@ -244,16 +259,24 @@ class Message(JsonDeserializable):
         sender = None
         if 'sender' in obj:
             sender = User.de_json(obj['sender'])
-        recipient = obj['recipient']
-        timestamp = obj['timestamp']
+        recipient = None
+        if 'recipient' in obj:
+            recipient = Recipient.de_json(obj['recipient'])
+        timestamp = None
+        if 'timestamp' in obj:
+            timestamp = obj['timestamp']
         link = None
         if 'link' in obj:
             link = obj['link']
-        body = Body.de_json(obj['body'])
+        body = None
+        if 'body' in obj:
+            body = Body.de_json(obj['body'])
         stat = None
         if 'stat' in obj:
             stat = obj['stat']
-        url = obj['url']
+        url = None
+        if 'url' in obj:
+            url = obj['url']
         constructor = None
         if 'constructor' in obj:
             constructor = obj['constructor']
@@ -426,7 +449,7 @@ class Update(JsonDeserializable):
             callback = obj['callback']
         message = None
         if 'message' in obj:
-            message = obj['message']
+            message = Message.de_json(obj['message'])
         user_locale = None
         if 'user_locale' in obj:
             user_locale = obj['user_locale']
@@ -471,6 +494,26 @@ class Update(JsonDeserializable):
             start_payload = obj['start_payload']
         return cls(update_type, timestamp, callback, message, user_locale, message_id, chat_id, user_id, session_id,
                    inviter_id, admin_id, user, is_channel, payload, title, data, iinput, start_payload)
+
+
+class UpdateInfo(JsonDeserializable):
+    def __init__(self, updates, marker):
+        self.updates = updates
+        self.marker = marker
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        updates = UpdateInfo.parse_updates(obj['updates'])
+        marker = obj['marker']
+        return cls(updates, marker)
+
+    @staticmethod
+    def parse_updates(obj):
+        updates = []
+        for x in obj:
+            updates.append(Update.de_json(x))
+        return updates
 
 
 class BotCommand(JsonDeserializable, JsonSerializable):
