@@ -97,7 +97,7 @@ class User(JsonDeserializable):
             join_time = obj['join_time']
         permissions = False
         if 'permissions' in obj:
-            permissions = obj['permissions']
+            permissions = Permissions.de_json(obj['permissions'])
         return cls(user_id, name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url,
                    commands, last_access_time, is_owner, is_admin, join_time, permissions)
 
@@ -107,6 +107,39 @@ class User(JsonDeserializable):
         for x in obj:
             commands.append(BotCommand.de_json(x))
         return commands
+
+
+class Permissions(JsonDeserializable):
+    def __init__(self, read_all_messages, add_remove_members, add_admins, change_chat_info, pin_message, write):
+        self.read_all_messages = read_all_messages
+        self.add_remove_members = add_remove_members
+        self.add_admins = add_admins
+        self.change_chat_info = change_chat_info
+        self.pin_message = pin_message
+        self.write = write
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        read_all_messages = False
+        if 'read_all_messages' in obj:
+            read_all_messages = True
+        add_remove_members = False
+        if 'add_remove_members' in obj:
+            add_remove_members = True
+        add_admins = False
+        if 'add_admins' in obj:
+            add_admins = True
+        change_chat_info = False
+        if 'change_chat_info' in obj:
+            change_chat_info = True
+        pin_message = False
+        if 'pin_message' in obj:
+            pin_message = True
+        write = False
+        if 'write' in obj:
+            write = True
+        return cls(read_all_messages, add_remove_members, add_admins, change_chat_info, pin_message, write)
 
 
 class Chat(JsonDeserializable):
