@@ -8,6 +8,7 @@ ttbotapi
 """
 
 from .api_exceptions import *
+from .api_functions import *
 from .api_handler import *
 from .json_helper import *
 from .logger import *
