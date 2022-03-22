@@ -369,6 +369,31 @@ class MarkupElement(JsonDeserializable):
         return cls(ttype, ffrom, length, url, user_link, user_id)
 
 
+class Subscription(JsonDeserializable):
+    def __init__(self, url, time, update_types, version):
+        self.url = url
+        self.time = time
+        self.update_types = update_types
+        self.version = version
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        url = None
+        if 'url' in obj:
+            url = obj['url']
+        time = None
+        if 'time' in obj:
+            time = obj['time']
+        update_types = None
+        if 'update_types' in obj:
+            update_types = obj['update_types']
+        version = None
+        if 'version' in obj:
+            version = obj['version']
+        return cls(url, time, update_types, version)
+
+
 class Update(JsonDeserializable):
     def __init__(self, update_type, timestamp, callback, message, user_locale, message_id, chat_id, user_id, session_id,
                  inviter_id, admin_id, user, is_channel, payload, title, data, iinput, start_payload):
