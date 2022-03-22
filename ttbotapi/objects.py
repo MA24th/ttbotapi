@@ -24,6 +24,25 @@ class Response(JsonDeserializable):
         return cls(success, message)
 
 
+class MemberInfo(JsonDeserializable):
+    def __init__(self, members, marker):
+        self.members = members
+        self.marker = marker
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        members = obj['members']
+        marker = obj['marker']
+        return cls(members, marker)
+
+    @staticmethod
+    def parse_members(obj):
+        members = []
+        for x in obj:
+            members.append(User.de_json(x))
+
+
 class User(JsonDeserializable):
     def __init__(self, user_id, name, username, is_bot, last_activity_time, description, avatar_url, full_avatar_url,
                  commands):
