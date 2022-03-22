@@ -6,6 +6,11 @@ ttbotapi.bot
 :copyright: (c) 2022 by Mustafa Asaad.
 :license: GPLv2, see LICENSE for more details.
 """
+import threading
+import time
+import re
+
+from . import utils
 from . import methods
 from . import objects
 
@@ -19,6 +24,313 @@ class Bot:
         """
         self.__access_token = access_token
         self.__proxies = proxies
+
+        self.__stop_polling = threading.Event()
+
+        self.__last_marker = 0
+
+        self.__message_callback_handlers = []
+        self.__message_created_handlers = []
+        self.__message_removed_handlers = []
+        self.__message_edited_handlers = []
+        self.__bot_added_handlers = []
+        self.__bot_removed_handlers = []
+        self.__user_added_handlers = []
+        self.__user_removed_handlers = []
+        self.__bot_started_handlers = []
+        self.__chat_title_changed_handlers = []
+        self.__message_construction_request_handlers = []
+        self.__message_constructed_handlers = []
+        self.__message_chat_created_handlers = []
+
+    def update_handler(self, update_type='message_created', chat_type=None, bot_command=None, regexp=None, func=None):
+        """
+        Update handler decorator
+        :param str or list update_type: specify one of allowed_updates to take action
+        :param str or list or None chat_type: list of chat types (dialog, chat, channel)
+        :param str or list or None bot_command: Bot Commands like (/start, /help)
+        :param str or None regexp: Sequence of characters that define a search pattern
+        :param function or None func: any python function that return True On success like (lambda)
+        :return: filtered Update`
+        """
+
+        def decorator(handler):
+            if 'message_callback' in update_type:
+                self.__message_callback_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                  bot_command=bot_command,
+                                                                                  regexp=regexp, func=func))
+            elif 'message_created' in update_type:
+                self.__message_created_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                 bot_command=bot_command,
+                                                                                 regexp=regexp, func=func))
+            elif 'message_removed' in update_type:
+                self.__message_removed_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                 bot_command=bot_command,
+                                                                                 regexp=regexp, func=func))
+            elif 'message_edited' in update_type:
+                self.__message_edited_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                bot_command=bot_command,
+                                                                                regexp=regexp, func=func))
+            elif 'bot_added' in update_type:
+                self.__bot_added_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                           bot_command=bot_command,
+                                                                           regexp=regexp, func=func))
+            elif 'bot_removed' in update_type:
+                self.__bot_removed_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                             bot_command=bot_command,
+                                                                             regexp=regexp, func=func))
+            elif 'user_added' in update_type:
+                self.__user_added_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                            bot_command=bot_command,
+                                                                            regexp=regexp, func=func))
+            elif 'user_removed' in update_type:
+                self.__user_removed_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                              bot_command=bot_command,
+                                                                              regexp=regexp, func=func))
+            elif 'bot_started' in update_type:
+                self.__bot_started_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                             bot_command=bot_command,
+                                                                             regexp=regexp, func=func))
+            elif 'chat_title_changed' in update_type:
+                self.__chat_title_changed_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                    bot_command=bot_command,
+                                                                                    regexp=regexp, func=func))
+            elif 'message_construction_request' in update_type:
+                self.__message_construction_request_handlers.append(
+                    self.__build_handler_dict(handler, chat_type=chat_type,
+                                              bot_command=bot_command,
+                                              regexp=regexp, func=func))
+            elif 'message_constructed' in update_type:
+                self.__message_constructed_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                     bot_command=bot_command,
+                                                                                     regexp=regexp, func=func))
+            elif 'message_chat_created' in update_type:
+                self.__message_chat_created_handlers.append(self.__build_handler_dict(handler, chat_type=chat_type,
+                                                                                      bot_command=bot_command,
+                                                                                      regexp=regexp, func=func))
+            return handler
+
+        return decorator
+
+    @staticmethod
+    def __build_handler_dict(handler, **filters):
+        """
+        Builds a dictionary for a handler
+        :param handler: functions name
+        :param filters: functions filters
+        :return: Return Dictionary type for handlers
+        :rtype: dict
+        """
+        return {
+            'function': handler,
+            'filters': filters
+        }
+
+    def polling(self, none_stop=False, limit=100, timeout=30, types=None):
+        """
+        This function creates a new Thread that calls an internal __retrieve_updates function
+        This allows the bot to retrieve Updates automatically and notify listeners and message handlers accordingly
+        Warning: Do not call this function more than once!
+        Always get updates
+        :param bool none_stop: Do not stop polling when an ApiException occurs
+        :param limit:
+        :param int timeout: Timeout in seconds for long polling
+        :param types:
+        :return:
+        """
+        interval = 0
+        error_interval = 0.25
+        utils.logger.info('POLLING STARTED')
+
+        while not self.__stop_polling.wait(interval):
+            try:
+                self.__retrieve_updates(limit, timeout, types)
+            except utils.ApiException as e:
+                utils.logger.error(e)
+                if not none_stop:
+                    self.__stop_polling.set()
+                    utils.logger.info("Exception Occurred, POLLING STOPPED")
+                else:
+                    utils.logger.info(f"Waiting for {error_interval} seconds until retry")
+                    time.sleep(error_interval)
+                    error_interval *= 2
+            except KeyboardInterrupt:
+                utils.logger.info("KeyboardInterrupt Occurred")
+                self.__stop_polling.set()
+                utils.logger.info('POLLING STOPPED')
+                break
+
+    def __retrieve_updates(self, limit, timeout, types=None):
+        """
+        Retrieves any updates from the TamTam API
+        :return:
+        """
+        marker = (self.__last_marker + 1)
+        updates = self.get_updates(limit, timeout, marker, types)
+        self.__process_new_updates(updates)
+
+    def __process_new_updates(self, updates):
+        new_message_callback = []
+        new_message_created = []
+        new_message_removed = []
+        new_message_edited = []
+        new_bot_added = []
+        new_bot_removed = []
+        new_user_added = []
+        new_user_removed = []
+        new_bot_started = []
+        new_chat_title_changed = []
+        new_message_construction_request = []
+        new_message_constructed = []
+        new_message_chat_created = []
+
+        if updates.marker > self.__last_marker:
+            self.__last_marker = updates.marker
+        for update in updates.updates:
+            if update.update_type == 'message_callback':
+                new_message_callback.append(update)
+            if update.update_type == 'message_created':
+                new_message_created.append(update)
+            if update.update_type == 'message_removed':
+                new_message_removed.append(update)
+            if update.update_type == 'message_edited':
+                new_message_edited.append(update)
+            if update.update_type == 'bot_added':
+                new_bot_added.append(update)
+            if update.update_type == 'bot_removed':
+                new_bot_removed.append(update)
+            if update.update_type == 'user_added':
+                new_user_added.append(update)
+            if update.update_type == 'user_removed':
+                new_user_removed.append(update)
+            if update.update_type == 'bot_started':
+                new_bot_started.append(update)
+            if update.update_type == 'chat_title_changed':
+                new_chat_title_changed.append(update)
+            if update.update_type == 'message_construction_request':
+                new_message_construction_request.append(update)
+            if update.update_type == 'message_constructed':
+                new_message_constructed.append(update)
+            if update.update_type == 'message_chat_created':
+                new_message_chat_created.append(update)
+
+        if len(updates.updates) > 0:
+            if len(new_message_callback) > 0:
+                self.__process_new_message_callback(new_message_callback)
+            if len(new_message_created) > 0:
+                self.__process_new_message_created(new_message_created)
+            if len(new_message_removed) > 0:
+                self.__process_new_message_removed(new_message_removed)
+            if len(new_message_edited) > 0:
+                self.__process_new_message_edited(new_message_edited)
+            if len(new_bot_added) > 0:
+                self.__process_new_bot_added(new_bot_added)
+            if len(new_bot_removed) > 0:
+                self.__process_new_bot_removed(new_bot_removed)
+            if len(new_user_added) > 0:
+                self.__process_new_user_added(new_user_added)
+            if len(new_user_removed) > 0:
+                self.__process_new_user_removed(new_user_removed)
+            if len(new_bot_started) > 0:
+                self.__process_new_bot_started(new_bot_started)
+            if len(new_message_construction_request) > 0:
+                self.__process_new_message_construction_request(new_message_construction_request)
+            if len(new_message_constructed) > 0:
+                self.__process_new_message_constructed(new_message_constructed)
+            if len(new_message_chat_created) > 0:
+                self.__process_new_message_chat_created(new_message_chat_created)
+
+    def __check_update_handler(self, update_handler, update):
+        """
+        check update handler
+        :param update_handler:
+        :param update:
+        :return:
+        """
+        for filters, filter_value in update_handler['filters'].items():
+            if filter_value is None:
+                continue
+
+            if not self.__check_filter(filters, filter_value, update):
+                return False
+
+        return True
+
+    @staticmethod
+    def __check_filter(filters, filter_value, update):
+        """
+        check filters
+        :param filters:
+        :param filter_value:
+        :param update:
+        :return:
+        """
+        if filters == 'chat_type':
+            return update.message.recipient.chat_type in filter_value
+        elif filters == 'regexp':
+            return update.message.body.text and re.search(filter_value, update.message.body.text, re.IGNORECASE)
+        elif filters == 'func':
+            return filter_value(update)
+        elif filters == 'bot_command':
+            return update.message.body.text in filter_value
+        else:
+            return False
+
+    @staticmethod
+    def __exec_task(task, *args, **kwargs):
+        task(*args, **kwargs)
+
+    def __notify_update_handler(self, handlers, new_updates):
+        """
+        Notifies update handlers
+        :param list handlers:
+        :param list new_updates:
+        :return:
+        """
+        for update in new_updates:
+            for update_handler in handlers:
+                if self.__check_update_handler(update_handler, update):
+                    self.__exec_task(update_handler['function'], update)
+                    break
+
+    def __process_new_message_callback(self, new_message_callback):
+        self.__notify_update_handler(self.__message_callback_handlers, new_message_callback)
+
+    def __process_new_message_created(self, new_message_created):
+        self.__notify_update_handler(self.__message_created_handlers, new_message_created)
+
+    def __process_new_message_removed(self, new_message_removed):
+        self.__notify_update_handler(self.__message_removed_handlers, new_message_removed)
+
+    def __process_new_message_edited(self, new_message_edited):
+        self.__notify_update_handler(self.__message_edited_handlers, new_message_edited)
+
+    def __process_new_bot_started(self, new_bot_started):
+        self.__notify_update_handler(self.__bot_started_handlers, new_bot_started)
+
+    def __process_new_bot_removed(self, new_bot_removed):
+        self.__notify_update_handler(self.__bot_removed_handlers, new_bot_removed)
+
+    def __process_new_user_added(self, new_user_added):
+        self.__notify_update_handler(self.__user_added_handlers, new_user_added)
+
+    def __process_new_user_removed(self, new_user_removed):
+        self.__notify_update_handler(self.__user_removed_handlers, new_user_removed)
+
+    def __process_new_bot_added(self, new_bot_added):
+        self.__notify_update_handler(self.__bot_added_handlers, new_bot_added)
+
+    def __process_new_chat_title_changed(self, new_chat_title_changed):
+        self.__notify_update_handler(self.__chat_title_changed_handlers, new_chat_title_changed)
+
+    def __process_new_message_construction_request(self, new_message_construction_request):
+        self.__notify_update_handler(self.__message_construction_request_handlers, new_message_construction_request)
+
+    def __process_new_message_constructed(self, new_message_constructed):
+        self.__notify_update_handler(self.__message_constructed_handlers, new_message_constructed)
+
+    def __process_new_message_chat_created(self, new_message_chat_created):
+        self.__notify_update_handler(self.__message_chat_created_handlers, new_message_chat_created)
 
     def get_bot_info(self):
         """
@@ -346,16 +658,13 @@ class Bot:
         The method is based on long polling
         :param int limit: Maximum number of updates to be retrieved
         :param int timeout: Timeout in seconds for long polling
-        :param int marker: Pass None to get updates you didn't get yet
+        :param int or None marker: Pass None to get updates you didn't get yet
         :param list[str] or None types: Comma separated list of update types your bot want to receive
-        :return: On Success, Array of Update object
-        :rtype: list[objects.Update]
+        :return: On Success, UpdateInfo object
+        :rtype: objects.UpdateInfo
         """
         resp = methods.get_update(self.__access_token, limit, timeout, marker, types, self.__proxies)
-        updates = []
-        for x in resp['updates']:
-            updates.append(objects.Update.de_json(x))
-        return updates
+        return objects.UpdateInfo.de_json(resp)
 
     def get_upload_url(self, data, ttype):
         """
