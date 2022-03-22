@@ -122,6 +122,26 @@ class Chat(JsonDeserializable):
                    is_public, link, description, dialog_with_user, messages_count, chat_message_id, pinned_message)
 
 
+class ChatInfo(JsonDeserializable):
+    def __init__(self, chats, marker):
+        self.chats = chats
+        self.marker = marker
+
+    @classmethod
+    def de_json(cls, obj_type):
+        obj = cls.check_type(obj_type)
+        chats = ChatInfo.parse_chats(obj['chat_id'])
+        marker = obj['marker']
+        return cls(chats, marker)
+
+    @staticmethod
+    def parse_chats(obj):
+        chats = []
+        for x in obj:
+            chats.append(Chat.de_json(x))
+        return chats
+
+
 class Message(JsonDeserializable):
     def __init__(self, sender, recipient, timestamp, link, body, stat, url, constructor):
         self.sender = sender
