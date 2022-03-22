@@ -7,21 +7,6 @@
 [![Upload Python Package](https://github.com/MA24th/ttbotapi/workflows/Upload%20Python%20Package/badge.svg)](https://github.com/MA24th/ttbotapi/actions/workflows/python-publish.yml)
 
 ## How to Use
-### Installation
-There are two ways to install the framework:
-* Installation using Python package manager:
-```bash
-$ pip install ttbotapi
-```
-* Installation from source (requires git):
-
-```bash
-$ git clone https://github.com/ma24th/ttbotapi.git
-$ cd ttbotapi
-$ python setup.py install
-```
-
-### Guide
 The Bot class encapsulates all API calls in a single class. It provides functions such as 
 `send_xyz` (`send_message`, `edit_message` etc.) and several ways to listen for incoming messages.
 

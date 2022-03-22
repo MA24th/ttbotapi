@@ -11,6 +11,7 @@ setup(
     version='0.3.0',
     description='TamTam Bot API library',
     long_description=read("README.md"),
+    long_description_content_type='text/markdown',
     author='Mustafa Asaad',
     author_email='ma24th@yahoo.com',
     url='https://github.com/MA24th/tgbotapi',
