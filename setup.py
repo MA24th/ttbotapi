@@ -14,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Mustafa Asaad',
     author_email='ma24th@yahoo.com',
-    url='https://github.com/MA24th/tgbotapi',
+    url='https://github.com/MA24th/ttbotapi',
     packages=find_packages(),
     classifiers=['Development Status :: 5 - Production/Stable',
                  'Programming Language :: Python :: 3.6',
