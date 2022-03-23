@@ -17,7 +17,7 @@ setup(
     url='https://github.com/MA24th/ttbotapi',
     packages=find_packages(),
     classifiers=['Development Status :: 5 - Production/Stable',
-                   'Framework :: tgbotapi'
+                   'Framework :: ttbotapi'
                    'Intended Audience :: Developers',
                    'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
                    'Programming Language :: Python :: 3.6',
