@@ -17,11 +17,13 @@ setup(
     url='https://github.com/MA24th/ttbotapi',
     packages=find_packages(),
     classifiers=['Development Status :: 5 - Production/Stable',
-                 'Programming Language :: Python :: 3.6',
-                 'Programming Language :: Python :: 3.7',
-                 'Programming Language :: Python :: 3.8',
-                 'Programming Language :: Python :: 3.9',
-                 'License :: OSI Approved :: GNU General Public License v2 (GPLv2)'],
+                   'Framework :: tgbotapi'
+                   'Intended Audience :: Developers',
+                   'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9'],
     license='GNU GPLv2',
     install_requires=['requests']
 )
